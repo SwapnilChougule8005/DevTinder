@@ -2,20 +2,24 @@ const express = require("express");
 
 const app = express();
 
-app.use("/",(req,res) => {
-    res.send("hello from dashboard");
-})
-app.use("/hello",(req,res) => {
-    res.send("hello from hello");
-})
-app.use("/test",(req,res) => {
-    res.send("Hello from the server");
-})
-app.use("/about",(req,res) => {
-    res.send("thi is about page")
-})
+// Handle Auth Middleware for all  GET POST .. request
+app.use("/admin", (req, res, next) => {
+    console.log("Admin auth id getting checked!!");
+    const token = "swapnil";
+    const isAdminAuthorized = token === "swapnil";
+    if(!isAdminAuthorized) {
+        res.status(401).send("Unauthorized request")
+    }else{
+        next();
+    }
+});
 
-
+app.get("/admin/getAllData", (req,res) => {
+    res.send("All Data Send");
+});
+app.get("/admin/deleteUser", (req, res) => {
+    res.send("Deleted a user")
+})
 app.listen(3000, () => {
     console.log("Server is Listening Successfully on 3000 port...");
 });
