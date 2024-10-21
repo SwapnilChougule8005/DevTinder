@@ -1,60 +1,50 @@
-/**const express = require("express");
-const connectDB = require("./config/database");
-const app = express();
-const User = require("./module/user");
-
-app.post("/signup", async, async (req, res) => {
-    const user = new User({
-        firstName: "swapnil",
-        lastName: "chougule",
-        gmailId: "swapnilchougule.com",
-        password: "swapnil@123",
-    });
-
-    await user.save();
-    res.send("User Added Successfully");
-});
-
-connectDB()
-.then(() => {
-    console.log("database connection established");
-    app.listen(3000, () => {
-        console.log("Server is Listening Successfully on 3000 port...");
-    });
-})
-.catch((err) => {
-    console.error("database cannot connected",err.message);
-})
-
-*/
-
 const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./module/user");
 
+app.use(express.json());
+
 app.post("/signup", async (req, res) => {
-  try {
-    // Create a new User instance
-    const user = new User({
-      firstName: "swapnil",
-      lastName: "chougule",
-      gmailId: "swapnilchougule.com",
-      password: "swapnil@123",
-    });
+  // Creating a new instance of the User model
+  const user =  new User(req.body);
 
-    // Save the user to the database
+  try{
     await user.save();
-
-    // Send a success response
     res.send("User Added Successfully");
-  } catch (error) {
-    // Catch and handle any errors
-    res.status(500).send("Error while adding user: " + error.message);
   }
-});
+  catch (err) {
+    res.status(400).send("Error saving the user :" + err.message);
+  }
+}) 
 
-// Start the server after connecting to the database
+app.get("/user", async (req,res) => {
+  const userName = req.body.firstName;
+
+  try{
+    const users = await User.find({firstName: userName});
+    if(users.length === 0) {
+      res.status(404).send("User not found")
+    }
+    else{
+        res.send(users);
+    }
+  }
+  catch (err) {
+    res.status(400).send("something went wrong");
+  }
+})
+app.get("/getAllUser", async (req, res) => {
+  
+  try{
+    const users = await User.find({})
+  res.send(users);
+  }
+  catch(err) {
+    res.status(404).send("something went wrong");
+  }
+})
+
 connectDB()
   .then(() => {
     console.log("Database connected successfully");
